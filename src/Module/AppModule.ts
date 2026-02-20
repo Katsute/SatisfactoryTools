@@ -368,7 +368,7 @@ export class AppModule
 				const version = transition.params().version;
 				const valid = ['0.8', '1.0', '1.0-ficsmas'];
 
-				let defaultVersion = '0.8';
+				let defaultVersion = '1.0';
 				if (transition.to().name === 'home') {
 					defaultVersion = '1.0';
 				}

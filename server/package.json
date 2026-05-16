@@ -1,0 +1,27 @@
+{
+  "name": "satisfactory-tools-server",
+  "version": "1.0.0",
+  "description": "Node.js API server for Satisfactory Tools",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.10.0",
+    "compression": "^1.8.0",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "javascript-lp-solver": "^1.0.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/compression": "^1.7.5",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.15.17",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}

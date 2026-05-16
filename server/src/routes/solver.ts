@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { ServerResponse } from 'http';
 import { solveProduction } from '../solver/ProductionSolver';
 import { IJsonSchema, ISolverRequest } from '../types';
 
@@ -7,8 +7,6 @@ import data08 from '../../../data/data.json';
 import data10 from '../../../data/data1.0.json';
 import data10Ficsmas from '../../../data/data1.0-ficsmas.json';
 
-const router = Router();
-
 function getDataForVersion(version: string): IJsonSchema | null {
     if (version === '0.8.0') return data08 as unknown as IJsonSchema;
     if (version === '1.0.0') return data10 as unknown as IJsonSchema;
@@ -16,39 +14,45 @@ function getDataForVersion(version: string): IJsonSchema | null {
     return null;
 }
 
+function sendJSON(res: ServerResponse, status: number, data: unknown): void {
+    const body = JSON.stringify(data);
+    res.writeHead(status, {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+    });
+    res.end(body);
+}
+
 /**
- * POST /v2/solver
+ * Handles POST /v2/solver.
  *
- * Body: ISolverRequest (JSON)
- * Response: { result: ISolverResponse }
+ * @param body  Parsed JSON body from the incoming request.
+ * @param res   The Node.js ServerResponse to write the result to.
  */
-router.post('/', (req: Request, res: Response): void => {
-    const body = req.body as ISolverRequest;
+export function handleSolver(body: unknown, res: ServerResponse): void {
+    const request = body as ISolverRequest;
 
-    if (!body || !body.gameVersion) {
-        res.status(400).json({ error: 'Missing gameVersion in request body' });
+    if (!request || !request.gameVersion) {
+        sendJSON(res, 400, { error: 'Missing gameVersion in request body' });
         return;
     }
 
-    const data = getDataForVersion(body.gameVersion);
+    const data = getDataForVersion(request.gameVersion);
     if (!data) {
-        res.status(400).json({ error: `Unsupported gameVersion: ${body.gameVersion}` });
+        sendJSON(res, 400, { error: `Unsupported gameVersion: ${request.gameVersion}` });
         return;
     }
 
-    // Basic validation
-    if (!Array.isArray(body.production) || body.production.length === 0) {
-        res.status(400).json({ error: 'production must be a non-empty array' });
+    if (!Array.isArray(request.production) || request.production.length === 0) {
+        sendJSON(res, 400, { error: 'production must be a non-empty array' });
         return;
     }
 
     try {
-        const result = solveProduction(body, data);
-        res.json({ result });
+        const result = solveProduction(request, data);
+        sendJSON(res, 200, { result });
     } catch (err) {
         console.error('Solver error:', err);
-        res.status(500).json({ error: 'Internal solver error' });
+        sendJSON(res, 500, { error: 'Internal solver error' });
     }
-});
-
-export default router;
+}

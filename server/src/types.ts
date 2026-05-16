@@ -103,24 +103,3 @@ export interface ISolverRequestInput {
 
 // Response from POST /v2/solver
 export type ISolverResponse = Record<string, number>;
-
-// POST /v2/share/ request body
-export interface IShareRequest {
-    metadata: {
-        name: string | null;
-        icon: string | null;
-        schemaVersion: number;
-        gameVersion: string;
-    };
-    request: {
-        allowedAlternateRecipes: string[];
-        blockedRecipes: string[];
-        blockedMachines?: string[];
-        blockedResources: string[];
-        sinkableResources: string[];
-        production: ISolverRequestItem[];
-        input: ISolverRequestInput[];
-        resourceMax: Record<string, number>;
-        resourceWeight: Record<string, number>;
-    };
-}

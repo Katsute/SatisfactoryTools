@@ -9,8 +9,10 @@ A Node.js / Express server that provides the back-end API for the
 |--------|------|-------------|
 | `GET`  | `/health` | Health check |
 | `POST` | `/v2/solver` | Solve a production plan |
-| `POST` | `/v2/share/` | Create a shareable link |
-| `GET`  | `/v2/share/:id` | Retrieve a shared production plan |
+
+### GET `/health`
+
+Returns `{ "status": "ok" }`.
 
 ### POST `/v2/solver`
 
@@ -60,22 +62,6 @@ Response key format:
 - `<itemClass>#Sink` – item fed to AWESOME Sink (items/min)
 - `<itemClass>#Input` – user-supplied input used (items/min)
 
-### POST `/v2/share/?version=<version>`
-
-Saves the request body (an `IShareRequest`) and returns a shareable URL.
-
-```json
-{ "link": "https://www.satisfactorytools.com/1.0?share=<uuid>" }
-```
-
-### GET `/v2/share/:id`
-
-Retrieves a previously saved plan.
-
-```json
-{ "data": { "metadata": { ... }, "request": { ... } } }
-```
-
 ## Setup
 
 ```bash
@@ -90,8 +76,6 @@ npm start
 |----------|---------|-------------|
 | `PORT` | `3000` | TCP port to listen on |
 | `ALLOWED_ORIGINS` | `https://www.satisfactorytools.com` | Comma-separated list of allowed CORS origins (use `*` for any) |
-| `SITE_ORIGIN` | `https://www.satisfactorytools.com` | Base URL used when generating share links |
-| `DB_PATH` | `<server_root>/shares.db` | Path to the SQLite database file for shares |
 
 ### Development
 
@@ -109,6 +93,3 @@ optimal set of recipes and machine counts.
   the scaling factor for all maximise targets.
 - **Phase 2**: minimise weighted raw-resource consumption while keeping
   `lambda` at its phase-1 value.
-
-Share data is persisted in a **SQLite** database using
-[`better-sqlite3`](https://github.com/WiseLibs/better-sqlite3).

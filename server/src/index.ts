@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import compression from 'compression';
 import solverRouter from './routes/solver';
-import shareRouter from './routes/share';
 
 const app = express();
 const PORT = parseInt(process.env.PORT ?? '3000', 10);
@@ -33,7 +32,6 @@ app.use(cors({
 // ── Routes ────────────────────────────────────────────────────────────────────
 
 app.use('/v2/solver', solverRouter);
-app.use('/v2/share', shareRouter);
 
 // Health check
 app.get('/health', (_req, res) => {

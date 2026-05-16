@@ -86,9 +86,6 @@ export class ProductionController
 			try {
 				const tabs = FileExporter.importTabs(reader.result as string);
 
-				this.tabs.forEach((tab) => tab.unregister());
-				this.tabs = [];
-
 				for (const tab of tabs) {
 					if (JSON.stringify(tab.request.resourceMax) === JSON.stringify(Data.resourceAmountsU8)) {
 						tab.request.resourceMax = Data.resourceAmounts;
@@ -101,11 +98,6 @@ export class ProductionController
 					tab.request.resourceWeight = Data.resourceWeights;
 					this.tabs.push(new ProductionTab(this.scope, this.$rootScope.version, tab));
 				}
-
-				if (this.tabs.length) {
-					this.tab = this.tabs[0];
-				}
-				this.saveState();
 
 				Strings.addNotification('Import complete', 'Successfuly imported ' + tabs.length + ' tab' + (tabs.length === 1 ? '' : 's') + '.');
 				this.scope.$apply();

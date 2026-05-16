@@ -1,7 +1,7 @@
 <h2>Production</h2>
 
 <p>
-	Each tab is a separate production line. You can have multiple tabs, and they will be automatically saved in your browser. You can also share them using the share button or reorganize by dragging them.
+	Each tab is a separate production line. You can have multiple tabs, and they will be automatically saved in your browser. You can export and import them as JSON files using the export button or the import section on the management tab.
 </p>
 
 <ul class="nav nav-tabs production-nav-tabs" ui-sortable="{axis: 'x',  'ui-floating': true}" ng-model="ctrl.tabs">
@@ -95,6 +95,13 @@
 						<input type="file" id="importFile">
 					</label>
 					<a ng-click="ctrl.tryImport()" class="btn btn-success">Import</a>
+
+					<h4 class="mt-3">Import preset (.json file)</h4>
+
+					<label>
+						<input type="file" id="importJsonFile" accept=".json">
+					</label>
+					<a ng-click="ctrl.importPresetJson()" class="btn btn-success">Import</a>
 				</div>
 			</div>
 		</div>
@@ -131,8 +138,8 @@
 			</span>
 
 			<span class="btn-group">
-				<a class="btn btn-info" ng-click="ctrl.tab.copyShareLink()" tooltip title="Share tab">
-					<span class="fas fa-share-alt"></span>
+				<a class="btn btn-info" ng-click="ctrl.tab.exportPresetJson()" tooltip title="Export preset as JSON">
+					<span class="fas fa-file-download"></span>
 				</a>
 				<a class="btn btn-success" ng-click="ctrl.cloneTab(ctrl.tab)" tooltip title="Clone tab">
 					<span ng-class="{'far': !ctrl.cloningInProgress, 'fas': ctrl.cloningInProgress, 'fa-fw': true, 'fa-clone': !ctrl.cloningInProgress, 'fa-spin': ctrl.cloningInProgress, 'fa-sync-alt': ctrl.cloningInProgress}"></span>
@@ -595,7 +602,7 @@
 		<span>This can be due to many things: missing resource required for the production line, not enough resources for the requested amount, disabled recipes required for the product, etc.</span><br>
 	</div>
 	<div ng-show="ctrl.tab.resultStatus === 'noResult' && ctrl.tab.easter" class="visualization-result">
-		<b title="Click the blue share button to get the share link.">Sharing is caring!</b>
+		<b>Sharing is caring!</b>
 	</div>
 	<div ng-show="ctrl.tab.resultStatus === 'noInput'" class="visualization-result">
 		Select an item to calculate.

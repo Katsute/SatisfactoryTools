@@ -1,0 +1,19 @@
+{
+  "name": "satisfactory-tools-server",
+  "version": "1.0.0",
+  "description": "Node.js API server for Satisfactory Tools",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "javascript-lp-solver": "^1.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.17",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}

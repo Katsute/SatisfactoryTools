@@ -2,7 +2,6 @@ import angular, {ITimeoutService} from 'angular';
 import {Constants} from '@src/Constants';
 import data, {Data} from '@src/Data/Data';
 import {IProductionControllerScope} from '@src/Module/Controllers/ProductionController';
-import axios from 'axios';
 import {Strings} from '@src/Utils/Strings';
 import {IItemSchema} from '@src/Schema/IItemSchema';
 import {Callbacks} from '@src/Utils/Callbacks';
@@ -37,7 +36,6 @@ export class ProductionTab
 
 	public tab: string = 'production';
 	public resultTab: string = 'visualization';
-	public shareLink: string = '';
 	public resultStatus: ResultStatus = ResultStatus.NO_INPUT;
 	public resultNew: ProductionResult|undefined;
 	public easter: boolean = false;
@@ -64,7 +62,6 @@ export class ProductionTab
 		}, Callbacks.debounce((newValue, oldValue) => {
 			this.firstRun = false;
 			this.scope.saveState();
-			this.shareLink = '';
 			this.calculate(this.scope.$timeout);
 		}, 400), true);
 	}
@@ -228,35 +225,12 @@ export class ProductionTab
 		return this.state.sinkableResourcesSortBy === 'name' ? item.name : item.sinkPoints;
 	}
 
-	public copyShareLink(): void
+	public exportPresetJson(): void
 	{
-		if (this.easter) {
-			Strings.copyToClipboard('https://easter.ficsit.app/OptvkwO668wweaMB', 'You\'ve successfully crafted a blueprint for the broken assembly line! You may now proceed to the link that has been copied (just paste it in your browser). You can also copy this link: https://easter.ficsit.app/OptvkwO668wweaMB', 20000);
-			return;
-		}
-
-		if (this.shareLink) {
-			Strings.copyToClipboard(this.shareLink, 'Link for sharing has been copied to clipboard.');
-			return;
-		}
-		const shareData = angular.copy(this.data);
-		shareData.metadata.name = this.name;
-		shareData.metadata.icon = this.icon;
-		axios({
-			method: 'POST',
-			url: 'https://api.satisfactorytools.com/v2/share/?version=' + this.version,
-			data: shareData,
-		}).then((response) => {
-			this.scope.$timeout(0).then(() => {
-				this.shareLink = response.data.link;
-				Strings.copyToClipboard(response.data.link, 'Link for sharing has been copied to clipboard.');
-			});
-		}).catch(() => {
-			this.scope.$timeout(0).then(() => {
-				this.shareLink = '';
-				alert('Couldn\'t get the share link.');
-			});
-		});
+		const presetData = angular.copy(this.data);
+		presetData.metadata.name = this.name;
+		presetData.metadata.icon = this.icon;
+		Strings.downloadFile('sftools-preset-' + Strings.webalize(this.name), 'json', JSON.stringify(presetData, null, '\t'), 'application/json');
 	}
 
 	public unregister(): void

@@ -8,7 +8,6 @@ import data, {Data} from '@src/Data/Data';
 import {IRecipeSchema} from '@src/Schema/IRecipeSchema';
 import {IResourceSchema} from '@src/Schema/IResourceSchema';
 import {DataStorageService} from '@src/Module/Services/DataStorageService';
-import axios from 'axios';
 import {IProductionData} from '@src/Tools/Production/IProductionData';
 import {IBuildingSchema} from '@src/Schema/IBuildingSchema';
 import {FileExporter} from '@src/Export/FileExporter';
@@ -41,14 +40,13 @@ export class ProductionController
 		'maximize': Constants.PRODUCTION_TYPE.MAXIMIZE,
 	};
 
-	public static $inject = ['$scope', '$timeout', 'DataStorageService', '$location', '$rootScope'];
+	public static $inject = ['$scope', '$timeout', 'DataStorageService', '$rootScope'];
 	private readonly storageKey: string;
 
 	public constructor(
 		private readonly scope: IProductionControllerScope,
 		private readonly $timeout: ITimeoutService,
 		private readonly dataStorageService: DataStorageService,
-		private readonly $location: ILocationService,
 		private readonly $rootScope: IRootScope,
 	)
 	{
@@ -65,27 +63,6 @@ export class ProductionController
 			this.saveState();
 		};
 		this.loadState();
-		$timeout(() => {
-			const query = this.$location.search();
-			if ('share' in query) {
-				axios({
-					method: 'GET',
-					url: 'https://api.satisfactorytools.com/v2/share/' + encodeURIComponent(query.share),
-				}).then((response) => {
-					$timeout(0).then(() => {
-						const tabData: IProductionData = response.data.data;
-						tabData.metadata.name = 'Shared: ' + tabData.metadata.name;
-						const tab = new ProductionTab(this.scope, $rootScope.version, tabData);
-						this.tabs.push(tab);
-						this.tab = tab;
-						this.saveState();
-						this.$location.search('');
-					});
-				}).catch(() => {
-					this.$location.search('');
-				});
-			}
-		});
 	}
 
 	public toggleImport(): void
@@ -130,6 +107,48 @@ export class ProductionController
 				return;
 			}
 		}
+	}
+
+	public importPresetJson(): void
+	{
+		const input: HTMLInputElement = document.getElementById('importJsonFile') as HTMLInputElement;
+		const files = input.files as FileList;
+
+		if (files.length === 0) {
+			return;
+		}
+
+		const file = files[0];
+		const reader = new FileReader();
+		reader.readAsText(file, 'utf-8');
+		reader.onload = () => {
+			try {
+				const tabData: IProductionData = JSON.parse(reader.result as string);
+
+				if (!tabData || !tabData.metadata || !tabData.request) {
+					throw new Error('Invalid preset file format');
+				}
+
+				if (JSON.stringify(tabData.request.resourceMax) === JSON.stringify(Data.resourceAmountsU8)) {
+					tabData.request.resourceMax = Data.resourceAmounts;
+				}
+
+				if (typeof tabData.request.resourceMax.Desc_SAM_C === 'undefined') {
+					tabData.request.resourceMax.Desc_SAM_C = 0;
+				}
+
+				tabData.request.resourceWeight = Data.resourceWeights;
+				this.tabs.push(new ProductionTab(this.scope, this.$rootScope.version, tabData));
+				this.tab = this.tabs[this.tabs.length - 1];
+				this.saveState();
+
+				Strings.addNotification('Import complete', 'Successfully imported preset: ' + (tabData.metadata.name || 'Unnamed Factory'));
+				this.scope.$apply();
+				input.value = '';
+			} catch (e) {
+				Strings.addNotification('ERROR', 'Couldn\'t import preset: ' + e.message, 5000);
+			}
+		};
 	}
 
 	public selectAllTabs(): void
